@@ -1,0 +1,51 @@
+---
+title: "Practical Machine Learning Course Project"
+author: "Michael Normyle"
+date: "December 6, 2017"
+output: html_document
+---
+
+```{r setup, include=TRUE}
+#load libraries
+library(caret)
+library(e1071)
+#load train and test data
+#for train data, deleted all predictors with missing & NA
+train <- read.csv("pml-training3.csv")
+test <- read.csv("pml-testing.csv")
+#fit model with gbm given wide variety of predictors
+#figure they will work as weak learners
+#fitting model with all predictors without missing/NA data
+modFit <- train(classe ~., method="gbm", data=train, 
+                na.action=na.omit)
+#fit model to test data
+pred <-predict(modFit, test)
+#print prediction
+pred
+#see predictor influence
+summary(modFit)
+```
+
+## R Markdown
+
+I started the model building process by looking at the training data. I saw that there were many variables with missing and NA
+values. The training data has 158 different series (including the classe series), but 100 of them have missing and NA values, 
+so I eliminated those series.
+
+Then, since there are still many predictors, some of which seem like they could be of varying importance, I thought the boosting
+(gbm) model would be a good option. This is because the boosting algorithm requires the predictors to be little better than a
+random guess to be of use.
+
+So, I went ahead with the gbm method in the caret package, running it on the training data, excluding the 100 series with missing
+and NA values. Unfortunately, the gbm method with this many predictors, with so many observations took a long time to run.
+Once the model was fitted, I used the summary function to see the relative importance of each predictor. Even having eliminated
+100 series, only 37 of the 57 predictors had any relevance.
+
+As far as cross validation is concerned, I had better success using the default settings for gbm, inasmuch as I did not use any
+specific setting for trainControl. When I tried using bootstrapping with 10 resamples, it caused issues with R summarizing the
+model. So the posted R code excludes this.
+
+I then ran the model on the test set and got the predicted values. I did not expect the out of sample error to be significant
+since there was such a wide breadth and depth of data available.
+
+Then, in running the 20 predicted values through the Course Project Prediction Quiz, the model was 100% accurate.
